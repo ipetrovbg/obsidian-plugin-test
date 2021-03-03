@@ -28,10 +28,10 @@ export default class DataTablePlugin extends Plugin {
                 exec(command, (err, stdout, stdErr) => {
                     if (err) {
                         console.log(err);
+                        console.log(stdErr);
                         return;                
                     }
                     new Notice(stdout, 20000);
-                    console.log(stdErr);
                 });
             }
 		});
