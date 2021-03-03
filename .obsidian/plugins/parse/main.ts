@@ -1,5 +1,5 @@
 import { Events, Notice, Plugin, TFile, View, Workspace, WorkspaceLeaf } from 'obsidian';
-import {exec} from "child_process";
+import {exec, execSync} from "child_process";
 
 
 export default class DataTablePlugin extends Plugin {
@@ -24,15 +24,23 @@ export default class DataTablePlugin extends Plugin {
 			if (evt.which === 83 && evt.metaKey) {
                 const command = `cd ${rootPath} && git add . && git commit -m "sync" && git push`;
                 new Notice(this.gitSyncMessage);
-                exec(`cd ${rootPath} && git status`, console.log);
-                exec(command, (err, stdout, stdErr) => {
-                    if (err) {
-                        console.log(stdErr);
-                        new Notice("Git Sync Error");
-                        return;                
+                execSync(`cd ${rootPath} && git add . && git status`);
+                
+                exec(`cd ${rootPath} && git status`, (errStatus, stdStatusOut) => {
+                    if (errStatus && new RegExp('Your branch is up to date').test(stdStatusOut)) {
+                        new Notice("Your branch is up to date");
+                    } else {
+                        exec(command, (err, stdout, stdErr) => {
+                            if (err) {
+                                console.log(stdErr);
+                                new Notice("Git Sync Error");
+                            } else {
+                                new Notice(stdout, 20000);
+                            }
+                        });
                     }
-                    new Notice(stdout, 20000);
                 });
+                
             }
 		});
 
