@@ -24,12 +24,13 @@ export default class DataTablePlugin extends Plugin {
 			if (evt.which === 83 && evt.metaKey) {
                 const command = `cd ${rootPath} && git add . && git commit -m "sync" && git push`;
                 new Notice(this.gitSyncMessage);
-                exec(command, (err, stdout) => {
+                exec(command, (err, stdout, stdErr) => {
                     if (err) {
                         console.log(err);
                         return;                
                     }
                     new Notice(stdout, 20000);
+                    console.log(stdErr);
                 });
             }
 		});
