@@ -23,6 +23,7 @@ export default class DataTablePlugin extends Plugin {
 			if (evt.which === 83 && evt.metaKey) {
                 const command = `cd ${rootPath} && git add . && git commit -m "sync" && git push`;
                 console.info(command);
+                debugger
                 exec(command, (err, stdout) => {
                     if (err) {
                         console.log(err);
