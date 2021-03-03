@@ -4,18 +4,18 @@ import {exec} from "child_process";
 
 export default class DataTablePlugin extends Plugin {
     workspace: Workspace;
-
+    private gitSyncMessage = 'Git Syncing...';
     public async onload(): Promise<void> {
 
         const rootPath = (this.app.vault.adapter as any).basePath;
         const readyCmd = `cd ${rootPath} && git pull`;
-        new Notice(readyCmd);
+        new Notice(this.gitSyncMessage);
         exec(readyCmd, (err, stdout) => {
             if (err) {
                 console.log(err);
                 return;                
             }
-            console.log(stdout);
+            new Notice(stdout);
         });
         this.workspace = this.app.workspace;
         
@@ -23,13 +23,13 @@ export default class DataTablePlugin extends Plugin {
         this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
 			if (evt.which === 83 && evt.metaKey) {
                 const command = `cd ${rootPath} && git add . && git commit -m "sync" && git push`;
-                new Notice(command);
+                new Notice(this.gitSyncMessage);
                 exec(command, (err, stdout) => {
                     if (err) {
                         console.log(err);
                         return;                
                     }
-                    console.log(stdout);
+                    new Notice(stdout);
                 });
             }
 		});
