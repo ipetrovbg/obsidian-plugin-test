@@ -29,7 +29,7 @@ export default class DataTablePlugin extends Plugin {
                         console.log(err);
                         return;                
                     }
-                    new Notice(stdout);
+                    new Notice(stdout, 20000);
                 });
             }
 		});
