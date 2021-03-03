@@ -1,50 +1,20 @@
 import { Events, Notice, Plugin, TFile, View, Workspace, WorkspaceLeaf } from 'obsidian';
 import {exec} from "child_process";
 
-const tableString = `
-# some text here
-
-and some text here too
-
-| column(Column,string) | secondColum(Second Column, string) | 
-| --------------------- | ---------------------------------- |
-| data                  | data in second column              |
-test
-
-`;
-
-
-
-// console.log(tableString);
-
-class DataTableView extends View {
-    static type = 'data-table'
-    getViewType(): string {
-        return DataTableView.type;
-    }
-
-    getDisplayText(): string {
-        return 'Data Table View';
-    }
-
-    constructor(leaf: WorkspaceLeaf) {
-        super(leaf);
-    }
-
-
-}
 
 export default class DataTablePlugin extends Plugin {
     workspace: Workspace;
 
     public async onload(): Promise<void> {
+
         const rootPath = (this.app.vault.adapter as any).basePath;
-        console.log('test')
+
         exec(`cd ${rootPath} && git pull`, (err, stdout) => {
-            console.log(err);
-            if (!err) {
-                console.log(stdout);
+            if (err) {
+                console.log(err);
+                return;                
             }
+            console.log(stdout);
         });
         this.workspace = this.app.workspace;
         
