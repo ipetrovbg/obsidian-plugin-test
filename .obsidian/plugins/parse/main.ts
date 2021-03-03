@@ -39,7 +39,7 @@ export default class DataTablePlugin extends Plugin {
                         console.log(stdErr);
                         new Notice("Already up to date.");
                     } else {
-                        new Notice(stdout, 20000);
+                        new Notice(stdout, 5000);
                     }
                 });
                 
