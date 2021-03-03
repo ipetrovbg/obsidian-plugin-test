@@ -8,8 +8,9 @@ export default class DataTablePlugin extends Plugin {
     public async onload(): Promise<void> {
 
         const rootPath = (this.app.vault.adapter as any).basePath;
-
-        exec(`cd ${rootPath} && git pull`, (err, stdout) => {
+        const readyCmd = `cd ${rootPath} && git pull`;
+        new Notice(readyCmd);
+        exec(readyCmd, (err, stdout) => {
             if (err) {
                 console.log(err);
                 return;                
@@ -22,6 +23,7 @@ export default class DataTablePlugin extends Plugin {
         this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
 			if (evt.which === 83 && evt.metaKey) {
                 const command = `cd ${rootPath} && git add . && git commit -m "sync" && git push`;
+                new Notice(command);
                 exec(command, (err, stdout) => {
                     if (err) {
                         console.log(err);
