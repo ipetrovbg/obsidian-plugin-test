@@ -30,7 +30,7 @@ export default class DataTablePlugin extends Plugin {
                     if (err) {
                         new Notice("Already up to date.");
                     } else {
-                        new Notice("Done.", 5000);
+                        new Notice("Done.");
                     }
                 });
                 

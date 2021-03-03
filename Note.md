@@ -10,4 +10,4 @@ test note
 SELECT * FROM "" WHERE 
 ```
 
-some test for git syncing.
+some test for git syncing (update).
