@@ -23,23 +23,14 @@ export default class DataTablePlugin extends Plugin {
         this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
 			if (evt.which === 83 && evt.metaKey) {
                 const command = `cd ${rootPath} && git add . && git commit -m "sync" && git push`;
+
                 new Notice(this.gitSyncMessage);
-                execSync(`cd ${rootPath} && git add . && git status`);
-                
-                // exec(`cd ${rootPath} && git status`, (errStatus, stdStatusOut) => {
-                //     if (errStatus && new RegExp('Your branch is up to date').test(stdStatusOut)) {
-                //         new Notice("Your branch is up to date");
-                //     } else {
-                        
-                //     }
-                // });
 
                 exec(command, (err, stdout, stdErr) => {
                     if (err) {
-                        console.log(stdErr);
                         new Notice("Already up to date.");
                     } else {
-                        new Notice(stdout, 5000);
+                        new Notice("Done.", 5000);
                     }
                 });
                 
