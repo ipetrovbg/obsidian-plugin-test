@@ -1,6 +1,6 @@
 test note
 
-- [ ] test
+- [x] test
 
 | aes     | asd  |
 | ------- | ---- |
