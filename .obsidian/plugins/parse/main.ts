@@ -37,9 +37,17 @@ class DataTableView extends View {
 export default class DataTablePlugin extends Plugin {
     workspace: Workspace;
 
-    async onload() {
-        this.workspace = this.app.workspace;
+    public async onload(): Promise<void> {
         const rootPath = (this.app.vault.adapter as any).basePath;
+        console.log('test')
+        exec(`cd ${rootPath} && git pull`, (err, stdout) => {
+            console.log(err);
+            if (!err) {
+                console.log(stdout);
+            }
+        });
+        this.workspace = this.app.workspace;
+        
         
         this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
 			if (evt.which === 83 && evt.metaKey) {
