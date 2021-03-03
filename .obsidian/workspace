@@ -11,7 +11,7 @@
           "type": "markdown",
           "state": {
             "file": "some-folder/nested note.md",
-            "mode": "preview"
+            "mode": "source"
           }
         }
       }

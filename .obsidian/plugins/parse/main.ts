@@ -1,4 +1,4 @@
-import { Plugin, TFile, View, Workspace, WorkspaceLeaf } from 'obsidian';
+import { Events, Plugin, TFile, View, Workspace, WorkspaceLeaf } from 'obsidian';
 import {exec} from "child_process";
 
 const tableString = `
@@ -39,13 +39,19 @@ export default class DataTablePlugin extends Plugin {
 
     async onload() {
         this.workspace = this.app.workspace;
-        const path = (this.app.vault.adapter as any).basePath;
-        const files = this.app.vault.getMarkdownFiles();
-        exec(`cd ${path} && git status`, (err, stdout) => {
-            if (!err) {
-                console.log(stdout);
+        const rootPath = (this.app.vault.adapter as any).basePath;
+        
+        this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
+			if (evt.which === 83 && evt.metaKey) {
+                exec(`cd ${rootPath} && git add . && git commit -m "sync" && git push`, (err, stdout) => {
+                    if (!err) {
+                        console.log(stdout);
+                    }
+                });
             }
-        });
+		});
+
+        
 
         this.registerMarkdownPostProcessor(async (el, ctx) => {
             const map = new Map();
