@@ -27,7 +27,7 @@ export default class DataTablePlugin extends Plugin {
                 exec("ls", console.log);
                 exec(command, (err, stdout, stdErr) => {
                     if (err) {
-                        console.log(err);
+                        // console.log(err);
                         console.log(stdErr);
                         return;                
                     }
