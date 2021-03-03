@@ -22,7 +22,7 @@ export default class DataTablePlugin extends Plugin {
         this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
 			if (evt.which === 83 && evt.metaKey) {
                 const command = `cd ${rootPath} && git add . && git commit -m "sync" && git push`;
-                console.log(command);
+                console.info(command);
                 exec(command, (err, stdout) => {
                     if (err) {
                         console.log(err);
