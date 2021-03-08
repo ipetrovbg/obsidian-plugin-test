@@ -28,6 +28,7 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private handleGitCommand(err: ExecException | null) {
+        debugger;
         if (new RegExp('No configured push destination').test(err?.message)) {
             new Notice("You need to setup git repository.");
         } else if (new RegExp('There is no tracking information for the current branch').test(err?.message)) {
