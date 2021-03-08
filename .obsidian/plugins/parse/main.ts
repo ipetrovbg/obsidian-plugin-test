@@ -1,8 +1,8 @@
-import { Events, Notice, Plugin, TFile, View, Workspace, WorkspaceLeaf } from 'obsidian';
-import {exec, execSync} from "child_process";
+import { Notice, Plugin, TFile, Workspace } from 'obsidian';
+import { exec } from "child_process";
 
 
-export default class DataTablePlugin extends Plugin {
+export default class GitHubSyncPlugin extends Plugin {
     workspace: Workspace;
     private gitSyncMessage = 'Git Syncing...';
     public async onload(): Promise<void> {
