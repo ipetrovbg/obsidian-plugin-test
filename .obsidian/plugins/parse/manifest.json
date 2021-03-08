@@ -1,10 +1,10 @@
 {
-	"id": "test-plugin",
-	"name": "Test plugin",
-	"version": "1.0.1",
+	"id": "github-sync-plugin",
+	"name": "GitHub vault",
+	"version": "1.0.0",
 	"minAppVersion": "0.9.12",
-	"description": "This is test plugin",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md/about",
-	"isDesktopOnly": false
+	"description": "GitHub vault synchronization plugin",
+	"author": "Petar Petrov",
+	"authorUrl": "https://github.com/ipetrovbg",
+	"isDesktopOnly": true
 }
