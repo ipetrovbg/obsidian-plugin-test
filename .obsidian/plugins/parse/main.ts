@@ -13,7 +13,7 @@ export default class GitHubSyncPlugin extends Plugin {
         exec(readyCmd, this.handleGitCommand.bind(this));
 
         this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
-			if (evt.which === 83 && evt.metaKey) {
+			if (evt.which === 83 && evt.metaKey || evt.ctrlKey && evt.which === 83) {
                 const command = `cd '${rootPath}' && git add . && git commit -m "sync" && git push`;
 
                 new Notice(this.gitSyncMessage);
