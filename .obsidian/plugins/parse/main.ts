@@ -36,7 +36,6 @@ export default class GitHubSyncPlugin extends Plugin {
             return;
         } else if (new RegExp('Command failed').test(err?.message)) {
             new Notice("Command failed.");
-            return;
         }
         if (err) {
             new Notice("Already up to date.");
