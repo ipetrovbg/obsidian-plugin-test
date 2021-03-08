@@ -30,15 +30,13 @@ export default class GitHubSyncPlugin extends Plugin {
     private handleGitCommand(err: ExecException | null) {
         if (new RegExp('No configured push destination').test(err?.message)) {
             new Notice("You need to setup git repository.");
-            return;
         } else if (new RegExp('There is no tracking information for the current branch').test(err?.message)) {
             new Notice("There is no tracking information for the current branch");
-            return;
-        }
-        if (err) {
-            new Notice("Already up to date.");
+        } else if (err) {
+           new Notice("Already up to date.");
         } else {
             new Notice("Done.");
         }
+
     }
 }
