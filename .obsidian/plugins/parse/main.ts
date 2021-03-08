@@ -33,7 +33,7 @@ export default class GitHubSyncPlugin extends Plugin {
         } else if (new RegExp('There is no tracking information for the current branch').test(err?.message)) {
             new Notice("There is no tracking information for the current branch");
         } else if (err && new RegExp(`Command failed: ${err.cmd}`).test(err?.message)) {
-            new Notice("Already up to date.");
+            new Notice("Nothing has changed.");
         } else if (err) {
            new Notice("Already up to date.");
         } else {
