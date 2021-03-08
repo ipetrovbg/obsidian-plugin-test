@@ -32,7 +32,7 @@ export default class GitHubSyncPlugin extends Plugin {
             new Notice("You need to setup git repository.");
         } else if (new RegExp('There is no tracking information for the current branch').test(err?.message)) {
             new Notice("There is no tracking information for the current branch");
-        } else if (new RegExp(`Command failed: ${err.cmd}`).test(err?.message)) {
+        } else if (err && new RegExp(`Command failed: ${err.cmd}`).test(err?.message)) {
             // do nothing.
         } else if (err) {
            new Notice("Already up to date.");
