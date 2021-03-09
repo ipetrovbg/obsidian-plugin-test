@@ -2,6 +2,7 @@
 - [x] (task) new task here
 - [x] (issue) some issue here
 - [x] test sync
+- [ ] some new record
 - [ ] hhhh
 - [ ] test
 - [ ] test2
