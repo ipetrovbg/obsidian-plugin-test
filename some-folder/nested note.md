@@ -3,6 +3,7 @@
 - [x] (issue) some issue here
 - [x] test sync
 - [ ] some new record
+- [ ] some new record with executing commands from command palette
 - [ ] hhhh
 - [ ] test
 - [ ] test2
