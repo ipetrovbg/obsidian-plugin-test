@@ -7,7 +7,7 @@
 - [ ] test2
 - [ ] test3
 - [ ] new test 4 test 123456
-- [ ] dfsdc
+- [x] dfsdc
 - [ ] sdfsdfsdf
 
 #task #issue
