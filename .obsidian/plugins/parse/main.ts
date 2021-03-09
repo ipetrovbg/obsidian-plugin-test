@@ -1,4 +1,4 @@
-import { normalizePath, Notice, Plugin, TFile, Workspace } from 'obsidian';
+import {Command, normalizePath, Notice, Plugin, TFile, Workspace } from 'obsidian';
 import {exec, ExecException} from "child_process";
 import {GitHubSettingTab} from './settings-tab';
 
@@ -7,10 +7,32 @@ export default class GitHubSyncPlugin extends Plugin {
     private gitSyncMessage = 'Git Syncing...';
     public async onload(): Promise<void> {
 
+
         const rootPath = normalizePath((this.app.vault.adapter as any).basePath);
-        const readyCmd = `cd "${rootPath}" && git pull`;
+        const gitPullCommand = `cd "${rootPath}" && git pull`;
+        const gitSyncCommand = `cd "${rootPath}" && git add . && git commit -m "sync" && git push`;
+
+        this.addCommand({
+            id: 'git-pull',
+            name: 'Git Pull',
+            callback: () => {
+
+                new Notice("Git Pull...");
+                exec(gitPullCommand, this.handleGitCommand.bind(this));
+            }
+        });
+
+        this.addCommand({
+            id: 'git-sync',
+            name: 'Git Sync',
+            callback: () => {
+
+                new Notice("Git Sync...");
+                exec(gitSyncCommand, this.handleGitCommand.bind(this));
+            }
+        });
         new Notice(this.gitSyncMessage);
-        exec(readyCmd, this.handleGitCommand.bind(this));
+        exec(gitPullCommand, this.handleGitCommand.bind(this));
 
         this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
 			if (evt.which === 83 && evt.metaKey || evt.ctrlKey && evt.which === 83) {
