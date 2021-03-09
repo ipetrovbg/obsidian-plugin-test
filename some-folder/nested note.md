@@ -1,5 +1,5 @@
 - [x] (task) hello world! 
-- [ ] (task) new task here
+- [x] (task) new task here
 - [ ] (issue) some issue here
 - [ ] test sync
 - [ ] hhhh
