@@ -3,7 +3,7 @@
 - [x] (issue) some issue here
 - [x] test sync
 - [ ] some new record
-- [ ] some new record with executing commands from command palette
+- [x] some new record with executing commands from command palette
 - [ ] someting new
 - [x] ppppppppppppppppppppppppppppppppppppppppppppppppppppppp
 - [ ] hhhh
