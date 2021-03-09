@@ -11,6 +11,9 @@ export default class GitHubSyncPlugin extends Plugin {
         const rootPath = normalizePath((this.app.vault.adapter as any).basePath);
         const gitPullCommand = `cd "${rootPath}" && git pull`;
         const gitSyncCommand = `cd "${rootPath}" && git add . && git commit -m "sync" && git push`;
+        const gitPushCommand = `cd "${rootPath}" && git push`;
+        const gitCommitCommand = `cd "${rootPath}" && git add . && git commit -m "sync"`;
+
 
         this.addCommand({
             id: 'git-pull',
@@ -29,6 +32,24 @@ export default class GitHubSyncPlugin extends Plugin {
 
                 new Notice("Git Sync...");
                 exec(gitSyncCommand, this.handleGitCommand.bind(this));
+            }
+        });
+        this.addCommand({
+            id: 'git-commit',
+            name: 'Git Commit',
+            callback: () => {
+
+                new Notice("Git Commit...");
+                exec(gitCommitCommand, this.handleGitCommand.bind(this));
+            }
+        });
+        this.addCommand({
+            id: 'git-push',
+            name: 'Git Push',
+            callback: () => {
+
+                new Notice("Git Push...");
+                exec(gitPushCommand, this.handleGitCommand.bind(this));
             }
         });
         new Notice(this.gitSyncMessage);
