@@ -5,69 +5,75 @@ import {GitHubSettingTab} from './settings-tab';
 
 export default class GitHubSyncPlugin extends Plugin {
     private gitSyncMessage = 'Git Syncing...';
+    private gitPullMessage = 'Git Pull...';
+    private gitPushMessage = 'Git Push...';
+    private gitCommitMessage = 'Git Commit...';
+
     public async onload(): Promise<void> {
 
 
         const rootPath = normalizePath((this.app.vault.adapter as any).basePath);
-        const gitPullCommand = `cd "${rootPath}" && git pull`;
-        const gitSyncCommand = `cd "${rootPath}" && git add . && git commit -m "sync" && git push`;
-        const gitPushCommand = `cd "${rootPath}" && git push`;
-        const gitCommitCommand = `cd "${rootPath}" && git add . && git commit -m "sync"`;
+
 
 
         this.addCommand({
             id: 'git-pull',
             name: 'Git Pull',
-            callback: () => {
-
-                new Notice("Git Pull...");
-                exec(gitPullCommand, this.handleGitCommand.bind(this));
-            }
+            callback: () => this.executePullCallback(rootPath)
         });
 
         this.addCommand({
             id: 'git-sync',
             name: 'Git Sync',
-            callback: () => {
-
-                new Notice("Git Sync...");
-                exec(gitSyncCommand, this.handleGitCommand.bind(this));
-            }
+            callback: () => this.executeSyncCallback(rootPath)
         });
+
         this.addCommand({
             id: 'git-commit',
             name: 'Git Commit',
-            callback: () => {
-
-                new Notice("Git Commit...");
-                exec(gitCommitCommand, this.handleGitCommand.bind(this));
-            }
+            callback: () => this.executeCommitCallback(rootPath)
         });
+
         this.addCommand({
             id: 'git-push',
             name: 'Git Push',
-            callback: () => {
-
-                new Notice("Git Push...");
-                exec(gitPushCommand, this.handleGitCommand.bind(this));
-            }
+            callback: () => this.executePushCallback(rootPath)
         });
-        new Notice(this.gitSyncMessage);
-        exec(gitPullCommand, this.handleGitCommand.bind(this));
+
+        this.executePullCallback(rootPath);
 
         this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
 			if (evt.which === 83 && evt.metaKey || evt.ctrlKey && evt.which === 83) {
-                const command = `cd "${rootPath}" && git add . && git commit -m "sync" && git push`;
-
-                new Notice(this.gitSyncMessage);
-
-                exec(command, this.handleGitCommand.bind(this));
-
+                this.executeSyncCallback(rootPath);
             }
 		});
 
         this.addSettingTab(new GitHubSettingTab(this.app, this));
 
+    }
+
+    private executePullCallback(rootPath: string) {
+        const gitPullCommand = `cd "${rootPath}" && git pull`;
+        new Notice(this.gitPullMessage);
+        exec(gitPullCommand, this.handleGitCommand.bind(this));
+    }
+
+    private executeCommitCallback(rootPath: string) {
+        const gitCommitCommand = `cd "${rootPath}" && git add . && git commit -m "sync"`;
+        new Notice(this.gitCommitMessage);
+        exec(gitCommitCommand, this.handleGitCommand.bind(this));
+    }
+
+    private executeSyncCallback(rootPath: string) {
+        const gitSyncCommand = `cd "${rootPath}" && git add . && git commit -m "sync" && git push`;
+        new Notice(this.gitSyncMessage);
+        exec(gitSyncCommand, this.handleGitCommand.bind(this));
+    }
+
+    private executePushCallback(rootPath: string) {
+        const gitPushCommand = `cd "${rootPath}" && git push`;
+        new Notice(this.gitPushMessage);
+        exec(gitPushCommand, this.handleGitCommand.bind(this));
     }
 
     private handleGitCommand(err: ExecException | null) {
