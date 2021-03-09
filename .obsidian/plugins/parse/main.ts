@@ -8,6 +8,7 @@ export default class GitHubSyncPlugin extends Plugin {
     private gitPullMessage = 'Git Pull...';
     private gitPushMessage = 'Git Push...';
     private gitCommitMessage = 'Git Commit...';
+    private gitBranchMessage = 'Git Branch';
 
     public async onload(): Promise<void> {
 
@@ -23,8 +24,8 @@ export default class GitHubSyncPlugin extends Plugin {
         });
 
         this.addCommand({
-            id: 'git-sync',
-            name: 'Git Sync',
+            id: 'git-commit-and-push',
+            name: 'Git Commit and Push',
             callback: () => this.executeSyncCallback(rootPath)
         });
 
@@ -32,6 +33,13 @@ export default class GitHubSyncPlugin extends Plugin {
             id: 'git-commit',
             name: 'Git Commit',
             callback: () => this.executeCommitCallback(rootPath)
+        });
+
+
+        this.addCommand({
+            id: 'git-branch',
+            name: 'Git Branch',
+            callback: () => this.executeBranchCommand(rootPath)
         });
 
         this.addCommand({
@@ -50,6 +58,18 @@ export default class GitHubSyncPlugin extends Plugin {
 
         this.addSettingTab(new GitHubSettingTab(this.app, this));
 
+    }
+
+    private executeBranchCommand(rootPath: string) {
+        const gitBranchCommand = `cd "${rootPath}" && git branch`;
+        new Notice(this.gitBranchMessage);
+        exec(gitBranchCommand, ((error, branchInfo) => {
+            if (!error) {
+                new Notice(`You are on ${branchInfo} branch`, 10000);
+            } else {
+                new Notice('Error.');
+            }
+        }));
     }
 
     private executePullCallback(rootPath: string) {
