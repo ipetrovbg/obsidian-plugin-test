@@ -94,13 +94,18 @@ export default class GitHubSyncPlugin extends Plugin {
 
     private executeChangesCount(rootPath: string, callback?: (count: number) => void) {
         const gitChangesCountCommand = `cd "${rootPath}" && git status -s | egrep "" | wc -l`;
-        new Notice(this.gitChangesCountMessage);
+
+        if (!callback) {
+            new Notice(this.gitChangesCountMessage);
+        }
+        
         exec(gitChangesCountCommand, ((error, count) => {
             if (!error) {
                 if (callback) {
                     callback(+count);
+                } else {
+                    new Notice(`You have ${count} ${ +count === 1 ? 'change' : 'changes'}`, 10000);
                 }
-                new Notice(`You have ${count} ${ +count === 1 ? 'change' : 'changes'}`, 10000);
             } else {
                 new Notice('Error.');
             }
