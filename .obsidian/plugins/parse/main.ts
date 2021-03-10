@@ -10,11 +10,18 @@ export default class GitHubSyncPlugin extends Plugin {
     private gitCommitMessage = 'Git Commit...';
     private gitBranchMessage = 'Git Branch';
     private gitChangesCountMessage = 'Git Changes Counting..';
+    private gitChangesMessage = 'Git Changes..';
 
     public async onload(): Promise<void> {
 
 
         const rootPath = normalizePath((this.app.vault.adapter as any).basePath);
+
+        this.addCommand({
+            id: 'git-changes',
+            name: 'Git Changes',
+            callback: () => this.executeChanges(rootPath)
+        });
 
         this.addCommand({
             id: 'git-changes-count',
@@ -66,11 +73,33 @@ export default class GitHubSyncPlugin extends Plugin {
 
     }
 
-    private executeChangesCount(rootPath: string) {
-        const gitBranchCommand = `cd "${rootPath}" && git status -s | egrep "" | wc -l`;
+    private executeChanges(rootPath: string) {
+        const gitChangesCommand = `cd "${rootPath}" && git status -s`;
+        new Notice(this.gitChangesMessage);
+
+        this.executeChangesCount(rootPath, count => {
+            if (count) {
+                exec(gitChangesCommand, ((error, changes) => {
+                    if (!error) {
+                        new Notice(changes, 20000);
+                    } else {
+                        new Notice('Error.');
+                    }
+                }));
+            } else {
+                new Notice("You don't have any changes");
+            }
+        });
+    }
+
+    private executeChangesCount(rootPath: string, callback?: (count: number) => void) {
+        const gitChangesCountCommand = `cd "${rootPath}" && git status -s | egrep "" | wc -l`;
         new Notice(this.gitChangesCountMessage);
-        exec(gitBranchCommand, ((error, count) => {
+        exec(gitChangesCountCommand, ((error, count) => {
             if (!error) {
+                if (callback) {
+                    callback(+count);
+                }
                 new Notice(`You have ${count} ${ +count === 1 ? 'change' : 'changes'}`, 10000);
             } else {
                 new Notice('Error.');
