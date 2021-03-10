@@ -9,12 +9,18 @@ export default class GitHubSyncPlugin extends Plugin {
     private gitPushMessage = 'Git Push...';
     private gitCommitMessage = 'Git Commit...';
     private gitBranchMessage = 'Git Branch';
+    private gitChangesCountMessage = 'Git Changes Counting..';
 
     public async onload(): Promise<void> {
 
 
         const rootPath = normalizePath((this.app.vault.adapter as any).basePath);
 
+        this.addCommand({
+            id: 'git-changes-count',
+            name: 'Git Changes Count',
+            callback: () => this.executeChangesCount(rootPath)
+        });
 
 
         this.addCommand({
@@ -58,6 +64,18 @@ export default class GitHubSyncPlugin extends Plugin {
 
         this.addSettingTab(new GitHubSettingTab(this.app, this));
 
+    }
+
+    private executeChangesCount(rootPath: string) {
+        const gitBranchCommand = `cd "${rootPath}" && git status -s | egrep "" | wc -l`;
+        new Notice(this.gitChangesCountMessage);
+        exec(gitBranchCommand, ((error, count) => {
+            if (!error) {
+                new Notice(`You have ${count} ${ +count === 1 ? 'change' : 'changes'}`, 10000);
+            } else {
+                new Notice('Error.');
+            }
+        }));
     }
 
     private executeBranchCommand(rootPath: string) {
