@@ -1,9 +1,10 @@
-import {Command, normalizePath, Notice, Plugin, TFile, Workspace } from 'obsidian';
+import { normalizePath, Notice, Plugin, Workspace } from 'obsidian';
 import {exec, ExecException} from "child_process";
 import {GitHubSettingTab} from './settings-tab';
 
 
 export default class GitHubSyncPlugin extends Plugin {
+    private workspace: Workspace;
     private gitSyncMessage = 'Git Syncing...';
     private gitPullMessage = 'Git Pull...';
     private gitPushMessage = 'Git Push...';
@@ -14,8 +15,28 @@ export default class GitHubSyncPlugin extends Plugin {
 
     public async onload(): Promise<void> {
 
+        this.workspace = this.app.workspace;
+
 
         const rootPath = normalizePath((this.app.vault.adapter as any).basePath);
+
+        this.addStatusBarItem().createSpan({cls: 'git'}, el => {
+
+            this.executeBranchCommand(rootPath, branch => {
+                el.innerText = branch;
+            });
+        });
+
+
+        this.registerInterval(window.setInterval(() => {
+            const gitEl: HTMLAllCollection = (this.app as any).statusBar.containerEl.getElementsByClassName('git')
+            // const gitEl = this.app.workspace.containerEl.getElementsByClassName('git');
+            this.executeChangesCount(rootPath, count => {
+               if (count && gitEl && gitEl.length) {
+                   gitEl[0].innerHTML = `${count}`;
+               }
+            });
+        }, 10000));
 
         this.addCommand({
             id: 'git-changes',
@@ -98,7 +119,7 @@ export default class GitHubSyncPlugin extends Plugin {
         if (!callback) {
             new Notice(this.gitChangesCountMessage);
         }
-        
+
         exec(gitChangesCountCommand, ((error, count) => {
             if (!error) {
                 if (callback) {
@@ -112,12 +133,18 @@ export default class GitHubSyncPlugin extends Plugin {
         }));
     }
 
-    private executeBranchCommand(rootPath: string) {
+    private executeBranchCommand(rootPath: string, callback?: (branch: string) => void) {
         const gitBranchCommand = `cd "${rootPath}" && git branch`;
-        new Notice(this.gitBranchMessage);
+        if (!callback) {
+            new Notice(this.gitBranchMessage);
+        }
         exec(gitBranchCommand, ((error, branchInfo) => {
             if (!error) {
-                new Notice(`You are on ${branchInfo} branch`, 10000);
+                if (!callback) {
+                    new Notice(`You are on ${branchInfo} branch`, 10000);
+                } else {
+                    callback(branchInfo);
+                }
             } else {
                 new Notice('Error.');
             }
