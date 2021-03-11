@@ -32,8 +32,14 @@ export default class GitHubSyncPlugin extends Plugin {
             const gitEl = (this.app as any).statusBar.containerEl.getElementsByClassName('git')
             // const gitEl = this.app.workspace.containerEl.getElementsByClassName('git');
             this.executeChangesCount(rootPath, count => {
-               if (count && gitEl && gitEl.length) {
-                   gitEl[0].innerText = `* ${count}`;
+               if (count) {
+                   if (gitEl && gitEl.length) {
+                    gitEl[0].innerText = `* ${count}`;
+                   }
+               } else {
+                   if (gitEl && gitEl.length) {
+                       gitEl[0].innerText = `no changes`;
+                   }
                }
             });
         }, 10000));
