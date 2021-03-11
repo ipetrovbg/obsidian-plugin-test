@@ -22,29 +22,16 @@ export default class GitHubSyncPlugin extends Plugin {
 
         this.addStatusBarItem().createSpan({cls: 'git'}, el => {
 
-            this.executeBranchCommand(rootPath, branch => {
-                this.executeChangesCount(rootPath, count => {
-                    el.innerHTML = `${branch} ${count === 1 ? '[' + count + ' change]' : '[' + count + ' changes]'}`;
-                });
-            });
+            this.countAndRenderGitChanges(el, rootPath);
         });
 
 
         this.registerInterval(window.setInterval(() => {
-            const gitEl = (this.app as any).statusBar.containerEl.getElementsByClassName('git')
-            this.executeBranchCommand(rootPath, branch => {
-                this.executeChangesCount(rootPath, count => {
-                    if (count) {
-                        if (gitEl && gitEl.length) {
-                            gitEl[0].innerHTML = `${branch} ${count === 1 ? '[' + count + ' change]' : '[' + count + ' changes]'}`;
-                        }
-                    } else {
-                        if (gitEl && gitEl.length) {
-                            gitEl[0].innerHTML = `${branch} [no changes]`;
-                        }
-                    }
-                });
-            });
+            const gitEl = (this.app as any).statusBar.containerEl.getElementsByClassName('git');
+
+            if (gitEl && gitEl.length) {
+                this.countAndRenderGitChanges(gitEl[0], rootPath);
+            }
         }, 10000));
 
         this.addCommand({
@@ -101,6 +88,22 @@ export default class GitHubSyncPlugin extends Plugin {
 
         this.addSettingTab(new GitHubSettingTab(this.app, this));
 
+    }
+
+    private countAndRenderGitChanges(el: HTMLElement, rootPath: string) {
+        this.executeBranchCommand(rootPath, branch => {
+            this.executeChangesCount(rootPath, count => {
+                if (count) {
+                    if (el) {
+                        el.innerHTML = `${branch} ${count === 1 ? '[' + count + ' change]' : '[' + count + ' changes]'}`;
+                    }
+                } else {
+                    if (el) {
+                        el.innerHTML = `${branch} [no changes]`;
+                    }
+                }
+            });
+        });
     }
 
     private executeChanges(rootPath: string) {
