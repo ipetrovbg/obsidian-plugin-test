@@ -5,7 +5,7 @@
 - [ ] some new record
 - [x] some new record with executing commands from command palette
 - [ ] someting new
-- [x] ppppppppppppppppp pppppppppppppppppppppppppppppppppppppp
+- [x] ppppppppppppppppp ppppppppppppppp ppppppppppppppppppppppp
 - [ ] hhhh
 - [ ] test
 - [ ] test2

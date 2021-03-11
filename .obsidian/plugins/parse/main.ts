@@ -24,7 +24,7 @@ export default class GitHubSyncPlugin extends Plugin {
 
             this.executeBranchCommand(rootPath, branch => {
                 this.executeChangesCount(rootPath, count => {
-                    el.innerHTML = `${branch} ${count === 1 ? '[' + count + 'change]' : '[' + count + 'changes]'}`;
+                    el.innerHTML = `${branch} ${count === 1 ? '[' + count + ' change]' : '[' + count + ' changes]'}`;
                 });
             });
         });
