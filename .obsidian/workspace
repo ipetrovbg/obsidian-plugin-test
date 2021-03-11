@@ -10,8 +10,8 @@
         "state": {
           "type": "markdown",
           "state": {
-            "file": "new file.md",
-            "mode": "source"
+            "file": "Note.md",
+            "mode": "preview"
           }
         }
       }
@@ -77,7 +77,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "new file.md",
+                "file": "Note.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +103,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "new file.md"
+                "file": "Note.md"
               }
             }
           }
@@ -115,8 +115,8 @@
     "collapsed": true
   },
   "lastOpenFiles": [
-    "Untitled.md",
     "Note.md",
+    "Untitled.md",
     "New Note.md",
     "some-folder/nested note.md"
   ]

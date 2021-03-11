@@ -4,7 +4,6 @@ import {GitHubSettingTab} from './settings-tab';
 
 
 export default class GitHubSyncPlugin extends Plugin {
-    private workspace: Workspace;
     private gitSyncMessage = 'Git Syncing...';
     private gitPullMessage = 'Git Pull...';
     private gitPushMessage = 'Git Push...';
@@ -15,24 +14,13 @@ export default class GitHubSyncPlugin extends Plugin {
 
     public async onload(): Promise<void> {
 
-        this.workspace = this.app.workspace;
-
-
         const rootPath = normalizePath((this.app.vault.adapter as any).basePath);
 
-        this.addStatusBarItem().createSpan({cls: 'git'}, el => {
+        this.addStatusBarItem().createSpan({cls: 'git'}, el =>
+            this.countAndRenderGitChanges(el, rootPath));
 
-            this.countAndRenderGitChanges(el, rootPath);
-        });
-
-
-        this.registerInterval(window.setInterval(() => {
-            const gitEl = (this.app as any).statusBar.containerEl.getElementsByClassName('git');
-
-            if (gitEl && gitEl.length) {
-                this.countAndRenderGitChanges(gitEl[0], rootPath);
-            }
-        }, 10000));
+        this.registerInterval(window.setInterval(() =>
+            this.renderChanges(rootPath), 10000));
 
         this.addCommand({
             id: 'git-changes',
