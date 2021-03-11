@@ -46,7 +46,6 @@ export default class GitHubSyncPlugin extends Plugin {
             callback: () => this.executeChangesCount(rootPath)
         });
 
-
         this.addCommand({
             id: 'git-pull',
             name: 'Git Pull',
@@ -64,7 +63,6 @@ export default class GitHubSyncPlugin extends Plugin {
             name: 'Git Commit',
             callback: () => this.executeCommitCallback(rootPath)
         });
-
 
         this.addCommand({
             id: 'git-branch',
@@ -104,6 +102,14 @@ export default class GitHubSyncPlugin extends Plugin {
                 }
             });
         });
+    }
+
+    private renderChanges(rootPath: string): void {
+        const gitEl = (this.app as any).statusBar.containerEl.getElementsByClassName('git');
+
+        if (gitEl && gitEl.length) {
+            this.countAndRenderGitChanges(gitEl[0], rootPath);
+        }
     }
 
     private executeChanges(rootPath: string) {
@@ -166,38 +172,63 @@ export default class GitHubSyncPlugin extends Plugin {
     private executePullCallback(rootPath: string) {
         const gitPullCommand = `cd "${rootPath}" && git pull`;
         new Notice(this.gitPullMessage);
-        exec(gitPullCommand, this.handleGitCommand.bind(this));
+        exec(gitPullCommand, (err) => {
+            this.handleGitCommand(err, () => {
+                this.renderChanges(rootPath);
+            });
+        });
     }
 
     private executeCommitCallback(rootPath: string) {
         const gitCommitCommand = `cd "${rootPath}" && git add . && git commit -m "sync"`;
         new Notice(this.gitCommitMessage);
-        exec(gitCommitCommand, this.handleGitCommand.bind(this));
+        exec(gitCommitCommand, (err) => {
+            this.handleGitCommand(err, () => {
+                this.renderChanges(rootPath);
+            });
+        });
     }
 
     private executeSyncCallback(rootPath: string) {
         const gitSyncCommand = `cd "${rootPath}" && git add . && git commit -m "sync" && git push`;
         new Notice(this.gitSyncMessage);
-        exec(gitSyncCommand, this.handleGitCommand.bind(this));
+        exec(gitSyncCommand, (err) => {
+            this.handleGitCommand(err, () => {
+                this.renderChanges(rootPath);
+            });
+        });
     }
 
     private executePushCallback(rootPath: string) {
         const gitPushCommand = `cd "${rootPath}" && git push`;
         new Notice(this.gitPushMessage);
-        exec(gitPushCommand, this.handleGitCommand.bind(this));
+        exec(gitPushCommand, (err) => {
+            this.handleGitCommand(err, () => {
+                this.renderChanges(rootPath);
+            });
+        });
     }
 
-    private handleGitCommand(err: ExecException | null) {
+    private handleGitCommand(err: ExecException | null, callback?: () => void) {
         if (new RegExp('No configured push destination').test(err?.message)) {
             new Notice("You need to setup git repository.");
         } else if (new RegExp('There is no tracking information for the current branch').test(err?.message)) {
             new Notice("There is no tracking information for the current branch");
         } else if (err && new RegExp(`Command failed: ${err.cmd}`).test(err?.message)) {
             new Notice("Nothing has changed.");
+            if (callback) {
+                callback();
+            }
         } else if (err) {
            new Notice("Already up to date.");
+            if (callback) {
+                callback();
+            }
         } else {
             new Notice("Done.");
+            if (callback) {
+                callback();
+            }
         }
 
     }
