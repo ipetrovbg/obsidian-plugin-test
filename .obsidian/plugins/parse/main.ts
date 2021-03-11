@@ -23,7 +23,9 @@ export default class GitHubSyncPlugin extends Plugin {
         this.addStatusBarItem().createSpan({cls: 'git'}, el => {
 
             this.executeBranchCommand(rootPath, branch => {
-                el.innerText = branch;
+                this.executeChangesCount(rootPath, count => {
+                    el.innerHTML = `${branch} ${count === 1 ? '[' + count + 'change]' : '[' + count + 'changes]'}`;
+                });
             });
         });
 
@@ -31,17 +33,14 @@ export default class GitHubSyncPlugin extends Plugin {
         this.registerInterval(window.setInterval(() => {
             const gitEl = (this.app as any).statusBar.containerEl.getElementsByClassName('git')
             this.executeBranchCommand(rootPath, branch => {
-                console.log(branch);
                 this.executeChangesCount(rootPath, count => {
-                    console.log(count);
                     if (count) {
                         if (gitEl && gitEl.length) {
-                            console.log(gitEl[0]);
-                            gitEl[0].innerHTML = `${branch} ${count}`;
+                            gitEl[0].innerHTML = `${branch} ${count === 1 ? '[' + count + ' change]' : '[' + count + ' changes]'}`;
                         }
                     } else {
                         if (gitEl && gitEl.length) {
-                            gitEl[0].innerHTML = `${branch} no changes`;
+                            gitEl[0].innerHTML = `${branch} [no changes]`;
                         }
                     }
                 });
