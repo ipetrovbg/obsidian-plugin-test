@@ -30,17 +30,21 @@ export default class GitHubSyncPlugin extends Plugin {
 
         this.registerInterval(window.setInterval(() => {
             const gitEl = (this.app as any).statusBar.containerEl.getElementsByClassName('git')
-            // const gitEl = this.app.workspace.containerEl.getElementsByClassName('git');
             this.executeBranchCommand(rootPath, branch => {
-               if (branch) {
-                   if (gitEl && gitEl.length) {
-                    gitEl[0].innerText = branch;
-                   }
-               } else {
-                   if (gitEl && gitEl.length) {
-                       gitEl[0].innerText = "none";
-                   }
-               }
+                console.log(branch);
+                this.executeChangesCount(rootPath, count => {
+                    console.log(count);
+                    if (count) {
+                        if (gitEl && gitEl.length) {
+                            console.log(gitEl[0]);
+                            gitEl[0].innerHTML = `${branch} ${count}`;
+                        }
+                    } else {
+                        if (gitEl && gitEl.length) {
+                            gitEl[0].innerHTML = `${branch} no changes`;
+                        }
+                    }
+                });
             });
         }, 10000));
 
