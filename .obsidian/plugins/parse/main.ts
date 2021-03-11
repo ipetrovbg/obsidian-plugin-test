@@ -29,11 +29,11 @@ export default class GitHubSyncPlugin extends Plugin {
 
 
         this.registerInterval(window.setInterval(() => {
-            const gitEl: HTMLAllCollection = (this.app as any).statusBar.containerEl.getElementsByClassName('git')
+            const gitEl = (this.app as any).statusBar.containerEl.getElementsByClassName('git')
             // const gitEl = this.app.workspace.containerEl.getElementsByClassName('git');
             this.executeChangesCount(rootPath, count => {
                if (count && gitEl && gitEl.length) {
-                   gitEl[0].innerHTML = `${count}`;
+                   gitEl[0].innerText = `* ${count}`;
                }
             });
         }, 10000));
