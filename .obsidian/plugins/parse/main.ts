@@ -31,14 +31,14 @@ export default class GitHubSyncPlugin extends Plugin {
         this.registerInterval(window.setInterval(() => {
             const gitEl = (this.app as any).statusBar.containerEl.getElementsByClassName('git')
             // const gitEl = this.app.workspace.containerEl.getElementsByClassName('git');
-            this.executeChangesCount(rootPath, count => {
-               if (count) {
+            this.executeBranchCommand(rootPath, branch => {
+               if (branch) {
                    if (gitEl && gitEl.length) {
-                    gitEl[0].innerText = `* ${count}`;
+                    gitEl[0].innerText = branch;
                    }
                } else {
                    if (gitEl && gitEl.length) {
-                       gitEl[0].innerText = `no changes`;
+                       gitEl[0].innerText = "none";
                    }
                }
             });
