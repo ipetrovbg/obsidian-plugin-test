@@ -30,7 +30,18 @@ export default class GitHubSyncPlugin extends Plugin {
             name: 'Git Changes Count',
             callback: () => this.executeChangesCount(rootPath, count => {
                 new Notice(`You have ${count} ${ +count === 1 ? 'change' : 'changes'}`, 10000);
-                this.renderChanges(rootPath);
+                this.executeBranchCommand(rootPath, branch => {
+                    const gitEl = (this.app as any).statusBar.containerEl.getElementsByClassName('git');
+                    if (count) {
+                        if (gitEl && gitEl.length) {
+                            gitEl[0].innerHTML = `${branch} ${count === 1 ? '[' + count + ' change]' : '[' + count + ' changes]'}`;
+                        }
+                    } else {
+                        if (gitEl && gitEl.length) {
+                            gitEl[0].innerHTML = `${branch} [no changes]`;
+                        }
+                    }
+                });
             })
         });
 
@@ -120,7 +131,14 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executeChangesCount(rootPath: string, callback?: (count: number) => void) {
-        const gitChangesCountCommand = `cd "${rootPath}" && git status -s | egrep "" | wc -l`;
+        const os = process.platform;
+        let gitChangesCountCommand = "";
+        if (os === 'win32') {
+            gitChangesCountCommand = `cd "${rootPath}" && git status -s | find /c /v ""`;
+        } else if (os === 'darwin') {
+            gitChangesCountCommand = `cd "${rootPath}" && git status -s | egrep "" | wc -l`;
+        }
+
 
         if (!callback) {
             new Notice(this.gitChangesCountMessage);
