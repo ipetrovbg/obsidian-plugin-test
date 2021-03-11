@@ -15,4 +15,3 @@ SELECT * FROM "" WHERE
 some test for git syncing (update).
 
 hhhhdd
-test testd

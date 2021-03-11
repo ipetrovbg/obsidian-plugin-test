@@ -1,6 +1,6 @@
 some note just for test
 
-- [ ] here
+- [x] here
 
 
 #todo #second
