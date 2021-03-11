@@ -19,8 +19,8 @@ export default class GitHubSyncPlugin extends Plugin {
         this.addStatusBarItem().createSpan({cls: 'git'}, el =>
             this.countAndRenderGitChanges(el, rootPath));
 
-        this.registerInterval(window.setInterval(() =>
-            this.renderChanges(rootPath), 10000));
+        // this.registerInterval(window.setInterval(() =>
+        //     this.renderChanges(rootPath), 10000));
 
         this.addCommand({
             id: 'git-changes',
@@ -31,7 +31,11 @@ export default class GitHubSyncPlugin extends Plugin {
         this.addCommand({
             id: 'git-changes-count',
             name: 'Git Changes Count',
-            callback: () => this.executeChangesCount(rootPath)
+            callback: () => this.executeChangesCount(rootPath, count => {
+                console.log(count);
+                new Notice(`You have ${count} ${ +count === 1 ? 'change' : 'changes'}`, 10000);
+                this.renderChanges(rootPath);
+            })
         });
 
         this.addCommand({
@@ -79,6 +83,7 @@ export default class GitHubSyncPlugin extends Plugin {
     private countAndRenderGitChanges(el: HTMLElement, rootPath: string) {
         this.executeBranchCommand(rootPath, branch => {
             this.executeChangesCount(rootPath, count => {
+                console.log('here');
                 if (count) {
                     if (el) {
                         el.innerHTML = `${branch} ${count === 1 ? '[' + count + ' change]' : '[' + count + ' changes]'}`;

@@ -4,10 +4,10 @@
 - [x] test sync
 - [ ] some new record
 - [x] some new record with executing commands from command palette
-- [ ] someting new
+- [x] someting new iiii
 - [x] ppppppppppppppppp ppppppppppppppp ppppppppppppppppppppppp
 - [ ] hhhh
-- [ ] test
+- [x] test
 - [ ] test2
 - [ ] test3
 - [ ] new test 4 tes t 123456 sdfdfv
