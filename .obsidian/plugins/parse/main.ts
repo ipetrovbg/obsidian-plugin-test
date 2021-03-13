@@ -218,10 +218,10 @@ export default class GitHubSyncPlugin extends Plugin {
         const command = this.fixWinPath(rootPath);
         const gitSyncCommand = `${command} && git add . && git commit -m "sync" && git push`;
         new Notice(this.gitSyncMessage);
-        exec(gitSyncCommand, (err, sync, stdErr) => {
+        exec(gitSyncCommand, (err, sync) => {
             debugger
             this.handleGitCommand(err, () => {
-                if (sync && !stdErr) {
+                if (sync) {
                     this.renderChanges(rootPath);
                     return;
                 }
