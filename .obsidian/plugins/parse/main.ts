@@ -153,14 +153,13 @@ export default class GitHubSyncPlugin extends Plugin {
 
         exec(gitChangesCountCommand, ((error, count, stderr) => {
             debugger
-            if (!error) {
+            if (count) {
                 if (callback) {
                     callback(+count);
                 } else {
                     new Notice(`You have ${count} ${ +count === 1 ? 'change' : 'changes'}`, 10000);
                 }
             } else {
-                debugger
                 new Notice('Changes Count Error.');
                 return;
             }
