@@ -1,5 +1,6 @@
-import { normalizePath, Notice, Plugin, Workspace } from 'obsidian';
+import { Notice, Plugin } from 'obsidian';
 import {exec, ExecException} from "child_process";
+import * as path from 'path';
 import {GitHubSettingTab} from './settings-tab';
 
 
@@ -14,7 +15,8 @@ export default class GitHubSyncPlugin extends Plugin {
 
     public async onload(): Promise<void> {
 
-        const rootPath = normalizePath((this.app.vault.adapter as any).basePath);
+        const rootPath = path.normalize((this.app.vault.adapter as any).basePath);
+
 
         this.addStatusBarItem().createSpan({cls: 'git'}, el =>
             this.countAndRenderGitChanges(el, rootPath));
@@ -112,7 +114,8 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executeChanges(rootPath: string) {
-        const gitChangesCommand = `cd "${rootPath}" && git status -s`;
+        const command = this.fixWinPath(rootPath);
+        const gitChangesCommand = `${command} && git status -s`;
         new Notice(this.gitChangesMessage);
 
         this.executeChangesCount(rootPath, count => {
@@ -133,12 +136,13 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executeChangesCount(rootPath: string, callback?: (count: number) => void) {
+        const command = this.fixWinPath(rootPath);
         const os = process.platform;
         let gitChangesCountCommand = "";
         if (os === 'win32') {
-            gitChangesCountCommand = `cd "${rootPath}" && git status -s | find /c /v ""`;
+            gitChangesCountCommand = `${command} && git status -s | find /c /v ""`;
         } else if (os === 'darwin') {
-            gitChangesCountCommand = `cd "${rootPath}" && git status -s | egrep "" | wc -l`;
+            gitChangesCountCommand = `${command} && git status -s | egrep "" | wc -l`;
         }
 
 
@@ -147,7 +151,7 @@ export default class GitHubSyncPlugin extends Plugin {
         }
 
         exec(gitChangesCountCommand, ((error, count, stderr) => {
-            if (!error) {
+            if (count && !stderr) {
                 if (callback) {
                     callback(+count);
                 } else {
@@ -161,12 +165,15 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executeBranchCommand(rootPath: string, callback?: (branch: string) => void) {
-        const gitBranchCommand = `cd "${rootPath}" && git branch`;
+        const command = this.fixWinPath(rootPath);
+        const gitBranchCommand = `${command} && git branch`;
+
         if (!callback) {
             new Notice(this.gitBranchMessage);
         }
-        exec(gitBranchCommand, ((error, branchInfo) => {
-            if (!error) {
+        exec(gitBranchCommand, ((error, branchInfo, stdErr) => {
+
+            if (branchInfo && !stdErr) {
                 if (!callback) {
                     new Notice(`You are on ${branchInfo} branch`, 10000);
                 } else {
@@ -180,51 +187,59 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executePullCallback(rootPath: string) {
-        const gitPullCommand = `cd "${rootPath}" && git pull`;
+        const command = this.fixWinPath(rootPath);
+        const gitPullCommand = `${command} && git pull`;
         new Notice(this.gitPullMessage);
-        exec(gitPullCommand, (err) => {
-            if (err) {
+        exec(gitPullCommand, (err, pullInfo, stdErr) => {
+            if (pullInfo && !stdErr) {
+                this.handleGitCommand(err);
                 return;
             }
-            this.handleGitCommand(err);
+            return;
         });
     }
 
     private executeCommitCallback(rootPath: string) {
-        const gitCommitCommand = `cd "${rootPath}" && git add . && git commit -m "sync"`;
+        const command = this.fixWinPath(rootPath);
+        const gitCommitCommand = `${command} && git add . && git commit -m "sync"`;
         new Notice(this.gitCommitMessage);
-        exec(gitCommitCommand, (err) => {
+        exec(gitCommitCommand, (err, commit, stdErr) => {
             this.handleGitCommand(err, () => {
-                if (err) {
+                if (commit && !stdErr) {
+                    this.renderChanges(rootPath);
                     return;
                 }
-                this.renderChanges(rootPath);
+                return;
             });
         });
     }
 
     private executeSyncCallback(rootPath: string) {
-        const gitSyncCommand = `cd "${rootPath}" && git add . && git commit -m "sync" && git push`;
+        const command = this.fixWinPath(rootPath);
+        const gitSyncCommand = `${command} && git add . && git commit -m "sync" && git push`;
         new Notice(this.gitSyncMessage);
-        exec(gitSyncCommand, (err) => {
+        exec(gitSyncCommand, (err, sync) => {
             this.handleGitCommand(err, () => {
-                if (err) {
+                if (sync) {
+                    this.renderChanges(rootPath);
                     return;
                 }
-                this.renderChanges(rootPath);
+                return;
             });
         });
     }
 
     private executePushCallback(rootPath: string) {
-        const gitPushCommand = `cd "${rootPath}" && git push`;
+        const command = this.fixWinPath(rootPath);
+        const gitPushCommand = `${command} && git push`;
         new Notice(this.gitPushMessage);
-        exec(gitPushCommand, (err) => {
+        exec(gitPushCommand, (err, push, stdErr) => {
             this.handleGitCommand(err, () => {
-                if (err) {
+                if (push && !stdErr) {
+                    this.renderChanges(rootPath);
                     return;
                 }
-                this.renderChanges(rootPath);
+                return;
             });
 
         });
@@ -252,5 +267,17 @@ export default class GitHubSyncPlugin extends Plugin {
             }
         }
 
+    }
+
+    private fixWinPath(rootPath: string) {
+        const os = process.platform;
+        if (os === 'win32') {
+            const driveMatch = new RegExp('^[^\*]').exec(rootPath);
+            if (driveMatch.length) {
+                return `${driveMatch[0].toLowerCase()}: && cd "${rootPath}"`;
+            }
+            throw new Error('Parsing path error');
+        }
+        return `cd "${rootPath}"`;
     }
 }
