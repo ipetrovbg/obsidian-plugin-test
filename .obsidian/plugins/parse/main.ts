@@ -137,7 +137,6 @@ export default class GitHubSyncPlugin extends Plugin {
 
     private executeChangesCount(rootPath: string, callback?: (count: number) => void) {
         const command = this.fixWinPath(rootPath);
-        console.log(command);
         const os = process.platform;
         let gitChangesCountCommand = "";
         if (os === 'win32') {
@@ -172,16 +171,15 @@ export default class GitHubSyncPlugin extends Plugin {
         if (!callback) {
             new Notice(this.gitBranchMessage);
         }
-        exec(gitBranchCommand, ((error, branchInfo) => {
+        exec(gitBranchCommand, ((error, branchInfo, stdErr) => {
 
-            if (!error) {
+            if (branchInfo && !stdErr) {
                 if (!callback) {
                     new Notice(`You are on ${branchInfo} branch`, 10000);
                 } else {
                     callback(branchInfo);
                 }
             } else {
-                debugger
                 new Notice('Getting Branch Error.');
                 return;
             }
@@ -192,11 +190,12 @@ export default class GitHubSyncPlugin extends Plugin {
         const command = this.fixWinPath(rootPath);
         const gitPullCommand = `${command} && git pull`;
         new Notice(this.gitPullMessage);
-        exec(gitPullCommand, (err) => {
-            if (err) {
+        exec(gitPullCommand, (err, pullInfo, stdErr) => {
+            if (pullInfo && !stdErr) {
+                this.handleGitCommand(err);
                 return;
             }
-            this.handleGitCommand(err);
+            return;
         });
     }
 
@@ -204,12 +203,13 @@ export default class GitHubSyncPlugin extends Plugin {
         const command = this.fixWinPath(rootPath);
         const gitCommitCommand = `${command} && git add . && git commit -m "sync"`;
         new Notice(this.gitCommitMessage);
-        exec(gitCommitCommand, (err) => {
+        exec(gitCommitCommand, (err, commit, stdErr) => {
             this.handleGitCommand(err, () => {
-                if (err) {
+                if (commit && !stdErr) {
+                    this.renderChanges(rootPath);
                     return;
                 }
-                this.renderChanges(rootPath);
+                return;
             });
         });
     }
@@ -218,12 +218,13 @@ export default class GitHubSyncPlugin extends Plugin {
         const command = this.fixWinPath(rootPath);
         const gitSyncCommand = `${command} && git add . && git commit -m "sync" && git push`;
         new Notice(this.gitSyncMessage);
-        exec(gitSyncCommand, (err) => {
+        exec(gitSyncCommand, (err, sync, stdErr) => {
             this.handleGitCommand(err, () => {
-                if (err) {
+                if (sync && !stdErr) {
+                    this.renderChanges(rootPath);
                     return;
                 }
-                this.renderChanges(rootPath);
+                return;
             });
         });
     }
@@ -232,12 +233,13 @@ export default class GitHubSyncPlugin extends Plugin {
         const command = this.fixWinPath(rootPath);
         const gitPushCommand = `${command} && git push`;
         new Notice(this.gitPushMessage);
-        exec(gitPushCommand, (err) => {
+        exec(gitPushCommand, (err, push, stdErr) => {
             this.handleGitCommand(err, () => {
-                if (err) {
+                if (push && !stdErr) {
+                    this.renderChanges(rootPath);
                     return;
                 }
-                this.renderChanges(rootPath);
+                return;
             });
 
         });
@@ -272,7 +274,6 @@ export default class GitHubSyncPlugin extends Plugin {
         if (os === 'win32') {
             const driveMatch = new RegExp('^[^\*]').exec(rootPath);
             if (driveMatch.length) {
-                console.log(driveMatch[0]);
                 return `${driveMatch[0].toLowerCase()}: && cd "${rootPath}"`;
             }
             throw new Error('Parsing path error');
