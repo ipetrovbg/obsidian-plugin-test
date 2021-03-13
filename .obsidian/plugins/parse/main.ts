@@ -1,5 +1,6 @@
-import { normalizePath, Notice, Plugin, Workspace } from 'obsidian';
+import { Notice, Plugin } from 'obsidian';
 import {exec, ExecException} from "child_process";
+import * as path from 'path';
 import {GitHubSettingTab} from './settings-tab';
 
 
@@ -14,7 +15,8 @@ export default class GitHubSyncPlugin extends Plugin {
 
     public async onload(): Promise<void> {
 
-        const rootPath = normalizePath((this.app.vault.adapter as any).basePath);
+        const rootPath = path.normalize((this.app.vault.adapter as any).basePath);
+
 
         this.addStatusBarItem().createSpan({cls: 'git'}, el =>
             this.countAndRenderGitChanges(el, rootPath));
@@ -112,7 +114,8 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executeChanges(rootPath: string) {
-        const gitChangesCommand = `cd "${rootPath}" && git status -s`;
+        const command = this.fixWinPath(rootPath);
+        const gitChangesCommand = `${command} && git status -s`;
         new Notice(this.gitChangesMessage);
 
         this.executeChangesCount(rootPath, count => {
@@ -133,12 +136,13 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executeChangesCount(rootPath: string, callback?: (count: number) => void) {
+        const command = this.fixWinPath(rootPath);
         const os = process.platform;
         let gitChangesCountCommand = "";
         if (os === 'win32') {
-            gitChangesCountCommand = `cd "${rootPath}" && git status -s | find /c /v ""`;
+            gitChangesCountCommand = `${command} && git status -s | find /c /v ""`;
         } else if (os === 'darwin') {
-            gitChangesCountCommand = `cd "${rootPath}" && git status -s | egrep "" | wc -l`;
+            gitChangesCountCommand = `${command} && git status -s | egrep "" | wc -l`;
         }
 
 
@@ -161,11 +165,14 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executeBranchCommand(rootPath: string, callback?: (branch: string) => void) {
-        const gitBranchCommand = `cd "${rootPath}" && git branch`;
+        const command = this.fixWinPath(rootPath);
+        const gitBranchCommand = `${command} && git branch`;
+
         if (!callback) {
             new Notice(this.gitBranchMessage);
         }
         exec(gitBranchCommand, ((error, branchInfo) => {
+
             if (!error) {
                 if (!callback) {
                     new Notice(`You are on ${branchInfo} branch`, 10000);
@@ -173,6 +180,7 @@ export default class GitHubSyncPlugin extends Plugin {
                     callback(branchInfo);
                 }
             } else {
+                debugger
                 new Notice('Getting Branch Error.');
                 return;
             }
@@ -180,7 +188,8 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executePullCallback(rootPath: string) {
-        const gitPullCommand = `cd "${rootPath}" && git pull`;
+        const command = this.fixWinPath(rootPath);
+        const gitPullCommand = `${command} && git pull`;
         new Notice(this.gitPullMessage);
         exec(gitPullCommand, (err) => {
             if (err) {
@@ -191,7 +200,8 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executeCommitCallback(rootPath: string) {
-        const gitCommitCommand = `cd "${rootPath}" && git add . && git commit -m "sync"`;
+        const command = this.fixWinPath(rootPath);
+        const gitCommitCommand = `${command} && git add . && git commit -m "sync"`;
         new Notice(this.gitCommitMessage);
         exec(gitCommitCommand, (err) => {
             this.handleGitCommand(err, () => {
@@ -204,7 +214,8 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executeSyncCallback(rootPath: string) {
-        const gitSyncCommand = `cd "${rootPath}" && git add . && git commit -m "sync" && git push`;
+        const command = this.fixWinPath(rootPath);
+        const gitSyncCommand = `${command} && git add . && git commit -m "sync" && git push`;
         new Notice(this.gitSyncMessage);
         exec(gitSyncCommand, (err) => {
             this.handleGitCommand(err, () => {
@@ -217,7 +228,8 @@ export default class GitHubSyncPlugin extends Plugin {
     }
 
     private executePushCallback(rootPath: string) {
-        const gitPushCommand = `cd "${rootPath}" && git push`;
+        const command = this.fixWinPath(rootPath);
+        const gitPushCommand = `${command} && git push`;
         new Notice(this.gitPushMessage);
         exec(gitPushCommand, (err) => {
             this.handleGitCommand(err, () => {
@@ -252,5 +264,17 @@ export default class GitHubSyncPlugin extends Plugin {
             }
         }
 
+    }
+
+    private fixWinPath(rootPath: string) {
+        const os = process.platform;
+        if (os === 'win32') {
+            const driveMatch = new RegExp('^[^\*]').exec(rootPath);
+            if (driveMatch.length) {
+                return `${driveMatch[0].toLowerCase()}: && cd "${rootPath}"`;
+            }
+            throw new Error('Parsing path error');
+        }
+        return `cd "${rootPath}"`;
     }
 }
