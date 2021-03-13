@@ -77,11 +77,11 @@ export default class GitHubSyncPlugin extends Plugin {
 
         this.executePullCallback(rootPath);
 
-        this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
-			if (evt.which === 83 && evt.metaKey || evt.ctrlKey && evt.which === 83) {
-                this.executeSyncCallback(rootPath);
-            }
-		});
+        // this.registerDomEvent(document, 'keydown', (evt: KeyboardEvent) => {
+		// 	if (evt.which === 83 && evt.metaKey || evt.ctrlKey && evt.which === 83) {
+        //         this.executeSyncCallback(rootPath);
+        //     }
+		// });
 
         this.addSettingTab(new GitHubSettingTab(this.app, this));
 
@@ -121,11 +121,13 @@ export default class GitHubSyncPlugin extends Plugin {
                     if (!error) {
                         new Notice(changes, 20000);
                     } else {
-                        new Notice('Error.');
+                        new Notice('changes Error.');
+                        return;
                     }
                 }));
             } else {
                 new Notice("You don't have any changes");
+                return;
             }
         });
     }
@@ -144,7 +146,7 @@ export default class GitHubSyncPlugin extends Plugin {
             new Notice(this.gitChangesCountMessage);
         }
 
-        exec(gitChangesCountCommand, ((error, count) => {
+        exec(gitChangesCountCommand, ((error, count, stderr) => {
             if (!error) {
                 if (callback) {
                     callback(+count);
@@ -152,7 +154,8 @@ export default class GitHubSyncPlugin extends Plugin {
                     new Notice(`You have ${count} ${ +count === 1 ? 'change' : 'changes'}`, 10000);
                 }
             } else {
-                new Notice('Error.');
+                new Notice('Changes Count Error.');
+                return;
             }
         }));
     }
@@ -170,7 +173,8 @@ export default class GitHubSyncPlugin extends Plugin {
                     callback(branchInfo);
                 }
             } else {
-                new Notice('Error.');
+                new Notice('Getting Branch Error.');
+                return;
             }
         }));
     }
@@ -179,9 +183,10 @@ export default class GitHubSyncPlugin extends Plugin {
         const gitPullCommand = `cd "${rootPath}" && git pull`;
         new Notice(this.gitPullMessage);
         exec(gitPullCommand, (err) => {
-            this.handleGitCommand(err, () => {
-                this.renderChanges(rootPath);
-            });
+            if (err) {
+                return;
+            }
+            this.handleGitCommand(err);
         });
     }
 
@@ -190,6 +195,9 @@ export default class GitHubSyncPlugin extends Plugin {
         new Notice(this.gitCommitMessage);
         exec(gitCommitCommand, (err) => {
             this.handleGitCommand(err, () => {
+                if (err) {
+                    return;
+                }
                 this.renderChanges(rootPath);
             });
         });
@@ -200,6 +208,9 @@ export default class GitHubSyncPlugin extends Plugin {
         new Notice(this.gitSyncMessage);
         exec(gitSyncCommand, (err) => {
             this.handleGitCommand(err, () => {
+                if (err) {
+                    return;
+                }
                 this.renderChanges(rootPath);
             });
         });
@@ -210,8 +221,12 @@ export default class GitHubSyncPlugin extends Plugin {
         new Notice(this.gitPushMessage);
         exec(gitPushCommand, (err) => {
             this.handleGitCommand(err, () => {
+                if (err) {
+                    return;
+                }
                 this.renderChanges(rootPath);
             });
+
         });
     }
 
