@@ -137,6 +137,7 @@ export default class GitHubSyncPlugin extends Plugin {
 
     private executeChangesCount(rootPath: string, callback?: (count: number) => void) {
         const command = this.fixWinPath(rootPath);
+        console.log(command);
         const os = process.platform;
         let gitChangesCountCommand = "";
         if (os === 'win32') {
@@ -158,6 +159,7 @@ export default class GitHubSyncPlugin extends Plugin {
                     new Notice(`You have ${count} ${ +count === 1 ? 'change' : 'changes'}`, 10000);
                 }
             } else {
+                debugger
                 new Notice('Changes Count Error.');
                 return;
             }
@@ -271,6 +273,7 @@ export default class GitHubSyncPlugin extends Plugin {
         if (os === 'win32') {
             const driveMatch = new RegExp('^[^\*]').exec(rootPath);
             if (driveMatch.length) {
+                console.log(driveMatch[0]);
                 return `${driveMatch[0].toLowerCase()}: && cd "${rootPath}"`;
             }
             throw new Error('Parsing path error');
