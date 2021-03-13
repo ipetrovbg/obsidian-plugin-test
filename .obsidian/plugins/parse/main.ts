@@ -152,8 +152,7 @@ export default class GitHubSyncPlugin extends Plugin {
         }
 
         exec(gitChangesCountCommand, ((error, count, stderr) => {
-            debugger
-            if (count) {
+            if (count && !stderr) {
                 if (callback) {
                     callback(+count);
                 } else {
